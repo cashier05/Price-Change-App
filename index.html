@@ -6,20 +6,17 @@
     <title>PRICE CHANGE LMI-05</title>
 
     <meta name="theme-color" content="#075E54">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Price Change">
 
-    <!-- Favicon (PNG) -->
-    <link rel="icon" type="image/png"
-          href="https://pdftourl.net/images/1793303524358-0580d996-2be0-4ea6-b39b-e8abab3a1c82.jpg">
-    <link rel="shortcut icon" type="image/png"
-          href="https://pdftourl.net/images/1793303524358-0580d996-2be0-4ea6-b39b-e8abab3a1c82.jpg">
+    <!-- Favicon & Icons -->
+    <link rel="icon" type="image/png" href="https://pdftourl.net/images/1793303524358-0580d996-2be0-4ea6-b39b-e8abab3a1c82.jpg">
+    <link rel="shortcut icon" type="image/png" href="https://pdftourl.net/images/1793303524358-0580d996-2be0-4ea6-b39b-e8abab3a1c82.jpg">
+    <link rel="apple-touch-icon" href="https://pdftourl.net/images/1793303524358-0580d996-2be0-4ea6-b39b-e8abab3a1c82.jpg">
 
-    <!-- Untuk iPhone -->
-    <link rel="apple-touch-icon"
-          href="https://pdftourl.net/images/1793303524358-0580d996-2be0-4ea6-b39b-e8abab3a1c82.jpg">
-
-    <!-- Manifest inline: agar Android pakai ikon ini saat dibuat pintasan -->
-    <link rel="manifest"
-          href='data:application/manifest+json,{"name":"Price Change","short_name":"Price Change","start_url":".","display":"standalone","background_color":"%23ffffff","theme_color":"%23075E54","icons":[{"src":"https://pdftourl.net/images/1793303524358-0580d996-2be0-4ea6-b39b-e8abab3a1c82.jpg","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
+    <!-- Manifest inline -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Price Change","short_name":"Price Change","start_url":".","display":"standalone","background_color":"%23ffffff","theme_color":"%23075E54","icons":[{"src":"https://pdftourl.net/images/1793303524358-0580d996-2be0-4ea6-b39b-e8abab3a1c82.jpg","sizes":"512x512","type":"image/png","purpose":"any maskable"}]}'>
 
     <style>
         html, body {
@@ -27,6 +24,7 @@
             width: 100%; height: 100%;
             background-color: #eee;
             overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         }
         .iframe-container {
             width: 100%;
@@ -39,6 +37,64 @@
             width: 100%; height: 100%;
             border: none;
         }
+        /* Tombol Install Melayang */
+        #install-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #075E54;
+            color: white;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 50px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 9999;
+            display: none; /* Default disembunyikan sampai siap */
+            align-items: center;
+            gap: 8px;
+        }
+        #install-btn:active {
+            transform: scale(0.95);
+        }
+        /* Modal Panduan untuk iOS */
+        #ios-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: flex-end;
+        }
+        .ios-card {
+            background: white;
+            width: 100%;
+            max-width: 500px;
+            padding: 24px;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+        .ios-card h3 { margin-top: 0; color: #075E54; }
+        .ios-card p { font-size: 14px; color: #333; line-height: 1.5; }
+        .close-modal {
+            background: #075E54;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            margin-top: 15px;
+            font-weight: bold;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -48,5 +104,70 @@
             allow="fullscreen; camera; microphone; display-capture; geolocation">
         </iframe>
     </div>
+
+    <!-- Tombol Install Mengambang -->
+    <button id="install-btn">
+        📥 Install Aplikasi
+    </button>
+
+    <!-- Modal Panduan Install untuk iPhone / Safari -->
+    <div id="ios-modal">
+        <div class="ios-card">
+            <h3>Install di iPhone / Safari</h3>
+            <p>Agar aplikasi ini lebih mudah diakses seperti aplikasi native:</p>
+            <p style="text-align: left; background: #f9f9f9; padding: 12px; border-radius: 8px;">
+                1. Ketuk tombol <b>Share</b> (ikon kotak dengan panah ke atas <span style="font-size:18px;">⎋</span>) di bagian bawah browser Safari.<br>
+                2. Geser menu ke bawah, lalu pilih <b>"Add to Home Screen"</b> (Tambah ke Layar Utama).<br>
+                3. Ketuk <b>Add</b> (Tambah) di pojok kanan atas.
+            </p>
+            <button class="close-modal" onclick="closeIosModal()">Mengerti</button>
+        </div>
+    </div>
+
+    <script>
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+        const iosModal = document.getElementById('ios-modal');
+
+        // Deteksi apakah perangkat adalah iOS (iPhone/iPad)
+        const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+        const isInStandaloneMode = ('standalone' in window.navigator) && (window.navigator.standalone);
+
+        // Jika di iOS dan belum di-install sebagai PWA, tampilkan tombol khusus iOS
+        if (isIos && !isInStandaloneMode) {
+            installBtn.style.display = 'flex';
+            installBtn.addEventListener('click', () => {
+                iosModal.style.display = 'flex';
+            });
+        }
+
+        // Tangkap event instalasi untuk Android (Chrome/Edge)
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.style.display = 'flex'; // Munculkan tombol di Android
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    installBtn.style.display = 'none';
+                }
+                deferredPrompt = null;
+            }
+        });
+
+        function closeIosModal() {
+            iosModal.style.display = 'none';
+        }
+
+        // Sembunyikan tombol jika sudah terinstal / dibuka dalam mode standalone
+        window.addEventListener('appinstalled', () => {
+            installBtn.style.display = 'none';
+            deferredPrompt = null;
+        });
+    </script>
 </body>
-</html>
+                </html>
